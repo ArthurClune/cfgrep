@@ -24,5 +24,6 @@ executable cfgrep
                      hxt,
                      hxt-tagsoup,
                      optparse-applicative,
-                     split
+                     split,
+                     transformers
 
