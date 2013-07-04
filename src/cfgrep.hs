@@ -4,7 +4,7 @@ import Control.Monad              ((>=>))
 import Data.Monoid                (mempty)
 import Data.List.Split            (split, keepDelimsL, onSublist)
 import Options.Applicative        ((<*>), (<$>), argument, arguments,
-                                   execParser, idm, info, metavar, str)
+                                   execParser, info, metavar, str)
 import System.IO                  (Handle, IOMode(..), hGetContents, stdin, openFile)
 import Text.HandsomeSoup          (css)
 import Text.XML.HXT.Core hiding   (trace)
@@ -38,8 +38,7 @@ main = do
          [f] -> openFile f ReadMode
                 >>= matchOverHandle (pattern options)
                 >>= mapM_ putStrLn
-         l   -> mapM (\f -> openFile f ReadMode
-                >>= matchOverHandle (pattern options)) l
+         l   -> mapM (\f -> openFile f ReadMode >>= matchOverHandle (pattern options)) l
                 >>= \x -> mapM_ printWithFilename (zip (files options) x)
   where
     parser = CFGrep <$> argument  str (metavar "pattern")
