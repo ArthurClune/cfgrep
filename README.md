@@ -29,10 +29,11 @@ Building
 
 
 ```
-$ cabal configure --enable-tests
+$ cabal configure
+$ cabal install --only-dependencies
 $ cabal install
 ```
-You'll get a binary pastewatch in ~/.cabal/bin (Linux) or ~/Library/Haskell/bin (OS X)
+You'll get a binary cfgrep in ~/.cabal/bin (Linux) or ~/Library/Haskell/bin (OS X)
 
 Binary Version
 ==============
