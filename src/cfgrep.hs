@@ -17,9 +17,17 @@ data CFGrep = CFGrep {
 
 findMatches::String -> String -> IO [String]
 findMatches pat page = do
-    results <- runX . xshow $ readString [ withTagSoup,
-                    withValidate no,
-                    withWarnings no]
+    results <- runX . xshow $
+                    readString [
+                        withParseHTML yes,
+                        withTagSoup,
+                        withValidate no,
+                        withWarnings no,
+                        withPreserveComment yes,
+                        withCanonicalize no,
+                        -- withStrictInput yes,
+                        withEncodingErrors yes
+                    ]
                     page >>> css pat
     return $ split (keepDelimsL $ onSublist ('<' : pat)) (head results)
 
