@@ -1,3 +1,5 @@
 dist
 cabal-dev
 sample-cf
+*.cfm
+
