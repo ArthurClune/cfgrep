@@ -18,28 +18,36 @@ data CFGrep = CFGrep {
                      files :: [String]
                      } deriving (Show)
 
-findMatches::String -> B.ByteString -> Text
+findMatches::String -> B.ByteString -> Maybe Text
 findMatches pat page = do
     let doc = fromDocument $ parseLBS page
-    toHtml $ query pat doc
+    let results = query pat doc
+    if length results == 0
+        then Nothing
+        else Just (toHtml $ query pat doc)
 
-matchOverHandle::String->Handle->IO Text
+matchOverHandle::String->Handle->IO (Maybe Text)
 matchOverHandle pat fh = do
     contents <- B.hGetContents fh
     return $ findMatches pat contents
 
-printWithFilename::(String, Text) -> IO ()
-printWithFilename (name, results) = putStrLn $ name ++ ": " ++ (show results)
+printWithFilename::(String, Maybe Text) -> IO ()
+printWithFilename (name, Just results) = putStrLn $ name ++ ": " ++ (show results)
+printWithFilename (_, Nothing)         = return ()
+
+printResult::Maybe Text -> IO ()
+printResult (Just s) = print s
+printResult Nothing = return ()
 
 main :: IO ()
 main = do
     options <- execParser opts
     case files options of
          []  -> matchOverHandle (pattern options) stdin
-                >>= putStrLn . show
+                >>= printResult
          [f] -> openFile f ReadMode
                 >>= matchOverHandle (pattern options)
-                >>= putStrLn . show
+                >>= printResult
          l   -> mapM (\f -> openFile f ReadMode >>= matchOverHandle (pattern options)) l
                 >>= \x -> mapM_ printWithFilename (zip (files options) x)
   where
