@@ -20,10 +20,10 @@ executable cfgrep
   default-language: Haskell2010
   ghc-options:       -Wall
   build-depends:     base ==4.6.*,
-                     HandsomeSoup,
-                     hxt,
-                     hxt-tagsoup,
+                     bytestring,
+                     dom-selector,
+                     html-conduit,
                      optparse-applicative,
-                     split,
-                     transformers
-
+                     text,
+                     transformers,
+                     xml-conduit

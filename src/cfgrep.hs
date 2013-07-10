@@ -1,51 +1,45 @@
-{-# Language OverloadedStrings #-}
+{-# Language OverloadedStrings, TemplateHaskell #-}
 
-import Control.Monad              ((>=>))
-import Data.Monoid                (mempty)
-import Data.List.Split            (split, keepDelimsL, onSublist)
-import Options.Applicative        ((<*>), (<$>), argument, arguments,
-                                   execParser, info, metavar, str)
-import System.IO                  (Handle, IOMode(..), hGetContents, stdin, openFile)
-import Text.HandsomeSoup          (css)
-import Text.XML.HXT.Core hiding   (trace)
-import Text.XML.HXT.TagSoup
+import qualified Data.ByteString.Lazy as B
+import           Data.Monoid                (mempty)
+import           Data.Text.Lazy             (Text)
+import           Options.Applicative        ((<*>), (<$>), argument, arguments,
+                                            execParser, info, metavar, str)
+import           System.IO                  (Handle, IOMode(..), stdin, openFile)
+
+import           Text.HTML.DOM
+import           Text.XML.Cursor            (fromDocument)
+import           Text.XML.Scraping          (toHtml)
+import           Text.XML.Selector
+
 
 data CFGrep = CFGrep {
                      pattern :: String,
                      files :: [String]
                      } deriving (Show)
 
-findMatches::String -> String -> IO [String]
+findMatches::String -> B.ByteString -> Text
 findMatches pat page = do
-    results <- runX . xshow $
-                    readString [
-                        withParseHTML yes,
-                        withTagSoup,
-                        withValidate no,
-                        withWarnings no,
-                        withPreserveComment yes,
-                        withCanonicalize no,
-                        -- withStrictInput yes,
-                        withEncodingErrors yes
-                    ]
-                    page >>> css pat
-    return $ split (keepDelimsL $ onSublist ('<' : pat)) (head results)
+    let doc = fromDocument $ parseLBS page
+    toHtml $ query pat doc
 
-matchOverHandle::String->Handle->IO [String]
-matchOverHandle pat = hGetContents >=> findMatches pat
+matchOverHandle::String->Handle->IO Text
+matchOverHandle pat fh = do
+    contents <- B.hGetContents fh
+    return $ findMatches pat contents
 
-printWithFilename::(String, [String]) -> IO ()
-printWithFilename (name, results) = mapM_ (putStrLn . (\x -> name ++ ": " ++ x)) results
+printWithFilename::(String, Text) -> IO ()
+printWithFilename (name, results) = putStrLn $ name ++ ": " ++ (show results)
 
 main :: IO ()
 main = do
     options <- execParser opts
     case files options of
          []  -> matchOverHandle (pattern options) stdin
-                >>= mapM_ putStrLn
+                >>= putStrLn . show
          [f] -> openFile f ReadMode
                 >>= matchOverHandle (pattern options)
-                >>= mapM_ putStrLn
+                >>= putStrLn . show
          l   -> mapM (\f -> openFile f ReadMode >>= matchOverHandle (pattern options)) l
                 >>= \x -> mapM_ printWithFilename (zip (files options) x)
   where
