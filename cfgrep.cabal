@@ -21,6 +21,8 @@ executable cfgrep
   ghc-options:       -Wall
   build-depends:     base ==4.6.*,
                      bytestring,
+                     errors,
+                     filemanip,
                      dom-selector,
                      html-conduit,
                      optparse-applicative,

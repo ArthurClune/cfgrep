@@ -50,5 +50,10 @@ Binary for Ubuntu 12.04 LTS 64 bit
 
 http://clune.org/cfgrep   (14Mb binary)
 
+Bugs/Limitations
+================
+
+Currently the file extensions searched for when using "-r" are limited to .cfc and .cfm
+
 
 
