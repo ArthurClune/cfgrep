@@ -9,7 +9,7 @@ import           Options.Applicative        ((<*>), (<$>), argument, arguments,
                                             value)
 import           System.FilePath.Find       ((==?), (||?), always, extension, find)
 import           System.Exit                (ExitCode(..), exitWith)
-import           System.IO                  (Handle, IOMode(..), stdin, openFile)
+import           System.IO                  (Handle, IOMode(..), hClose, stdin, openFile)
 import           Text.HTML.DOM              (parseLBS)
 import           Text.XML.Cursor            (fromDocument)
 import           Text.XML.Scraping          (toHtml)
@@ -33,7 +33,7 @@ findMatches pat page = do
 matchOverHandle::String->Handle->IO (Maybe Text)
 matchOverHandle pat fh = do
     contents <- B.hGetContents fh
-    return $ findMatches pat contents
+    return $! findMatches pat contents
 
 matchOverFiles::String->[String]->IO [Maybe Text]
 matchOverFiles pat = mapM (\f -> openFile f ReadMode >>= matchOverHandle pat)
