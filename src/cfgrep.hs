@@ -4,17 +4,17 @@ import           Control.Error.Util         (errLn)
 import qualified Data.ByteString.Lazy as B
 import           Data.Monoid                (mempty, (<>))
 import           Data.Text.Lazy             (Text)
+import qualified Data.Text.Lazy as T
 import           Options.Applicative        ((<*>), (<$>), argument, arguments,
                                             execParser, info, metavar, short, str, switch,
                                             value)
 import           System.FilePath.Find       ((==?), (||?), always, extension, find)
 import           System.Exit                (ExitCode(..), exitWith)
-import           System.IO                  (Handle, IOMode(..), hClose, stdin, openFile)
+import           System.IO                  (Handle, IOMode(..), stdin, openFile)
 import           Text.HTML.DOM              (parseLBS)
 import           Text.XML.Cursor            (fromDocument)
 import           Text.XML.Scraping          (toHtml)
-import           Text.XML.Selector
-
+import           Text.XML.Selector          (query)
 
 data CFGrep = CFGrep {
                      optRecurse :: Bool,
@@ -24,11 +24,10 @@ data CFGrep = CFGrep {
 
 findMatches::String -> B.ByteString -> Maybe Text
 findMatches pat page = do
-    let doc = fromDocument $ parseLBS page
-    let results = query pat doc
+    let results = query pat $ fromDocument $ parseLBS page
     if null results
         then Nothing
-        else Just (toHtml $ query pat doc)
+        else Just $ toHtml results
 
 matchOverHandle::String->Handle->IO (Maybe Text)
 matchOverHandle pat fh = do
@@ -39,7 +38,7 @@ matchOverFiles::String->[String]->IO [Maybe Text]
 matchOverFiles pat = mapM (\f -> openFile f ReadMode >>= matchOverHandle pat)
 
 printWithFilename::(String, Maybe Text) -> IO ()
-printWithFilename (name, Just results) = putStrLn $ name ++ ": " ++ show results
+printWithFilename (name, Just results) = putStrLn $ "\n" ++ name ++ ": \n\n" ++ T.unpack results
 printWithFilename (_, Nothing)         = return ()
 
 printResult::Maybe Text -> IO ()
