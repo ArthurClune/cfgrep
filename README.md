@@ -22,7 +22,15 @@ and (eventID = 0 or bambuserID is not null)
 </cfqueryparam></cfquery>
 ```
 
-Useful for spotting SQLi
+The pattern is a full jQuery CSS selector. Some useful queries:
+```
+cfgrep "cfquery[username]" *.cfm
+```
+(find all cfquery with username parameters)
+```
+cfgrep "cfquery cfqueryparam" *.cfm
+```
+(find all cfqueryparam tags that are descendents of cfquery tags)
 
 Building
 ========
