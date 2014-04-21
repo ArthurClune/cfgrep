@@ -48,7 +48,7 @@ Binary Version
 
 Binary for Ubuntu 12.04 LTS 64 bit
 
-http://clune.org/cfgrep.gz   (2.8Mb gzip compressed binary)
+http://files.clune.org/cfgrep.gz   (2.8Mb gzip compressed binary, SHA256 e82d7cf5a173989a3b370dcbe630d8db447353155fcf7eaa23f06b76c4fa5f73)
 
 Bugs/Limitations
 ================
